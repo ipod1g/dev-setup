@@ -1,0 +1,18 @@
+{
+  "extensions": [
+    "aaron-bond.better-comments",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "naumovs.color-highlight",
+    "oderwat.indent-rainbow",
+    "usernamehw.errorlens",
+    "vivaxy.vscode-conventional-commits",
+    "vscode-icons-team.vscode-icons",
+    "wix.vscode-import-cost",
+    "yoavbls.pretty-ts-errors"
+  ]
+}

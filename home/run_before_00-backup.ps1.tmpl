@@ -1,0 +1,31 @@
+{{ if eq .chezmoi.os "windows" -}}
+$ErrorActionPreference = 'Stop'
+$destination = '{{ .chezmoi.destDir | replace "'" "''" }}'
+$backup = Join-Path $destination ('.local/state/dev-setup/backups/' + (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ') + '-' + [guid]::NewGuid().ToString('N'))
+$targets = @(
+{{ if .configureT3 }}
+    '.t3/userdata/settings.json'
+    '.t3/userdata/keybindings.json'
+{{ end }}
+{{ if .configureCodex }}
+    '.codex/config.toml'
+{{ end }}
+{{ if ne .editor "none" }}
+    'AppData/Roaming/{{ if eq .editor "cursor" }}Cursor{{ else }}Code{{ end }}/User/settings.json'
+    'AppData/Roaming/{{ if eq .editor "cursor" }}Cursor{{ else }}Code{{ end }}/User/keybindings.json'
+{{ end }}
+{{ if .legacyNeovim }}
+    'AppData/Local/nvim/init.lua'
+    'AppData/Local/nvim/lua/user/vscode_keymaps.lua'
+{{ end }}
+)
+foreach ($relative in $targets) {
+    $source = Join-Path $destination $relative
+    if (Test-Path -LiteralPath $source -PathType Leaf) {
+        $target = Join-Path $backup $relative
+        New-Item -ItemType Directory -Force -Path (Split-Path $target) | Out-Null
+        Copy-Item -LiteralPath $source -Destination $target
+    }
+}
+if (Test-Path -LiteralPath $backup) { Write-Host "Saved existing configuration to $backup" }
+{{ end -}}

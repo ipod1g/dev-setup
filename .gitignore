@@ -1,0 +1,14 @@
+.DS_Store
+Thumbs.db
+*.sqlite*
+*.db
+*.log
+*.pem
+*.key
+.env
+.env.*
+auth.json
+credentials.json
+node_modules/
+__pycache__/
+.test-output/

@@ -1,0 +1,29 @@
+{{ if not (has .editor (list "cursor" "vscode" "none")) }}
+{{ fail "editor must be cursor, vscode, or none; use chezmoi edit-config" }}
+{{ end }}
+{{ if ne .chezmoi.os "windows" }}
+AppData
+{{ end }}
+{{ if ne .chezmoi.os "darwin" }}
+Library
+{{ end }}
+{{ if ne .editor "cursor" }}
+AppData/Roaming/Cursor
+Library/Application Support/Cursor
+{{ end }}
+{{ if ne .editor "vscode" }}
+AppData/Roaming/Code
+Library/Application Support/Code
+{{ end }}
+{{ if not .configureT3 }}
+.t3
+{{ end }}
+{{ if not .configureCodex }}
+.codex
+{{ end }}
+{{ if or (not .legacyNeovim) (eq .chezmoi.os "windows") }}
+.config/nvim
+{{ end }}
+{{ if not .legacyNeovim }}
+AppData/Local/nvim
+{{ end }}

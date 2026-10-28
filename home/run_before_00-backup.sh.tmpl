@@ -1,0 +1,34 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/bin/sh
+set -eu
+umask 077
+destination='{{ .chezmoi.destDir | replace "'" "'\\''" }}'
+backup_dir="$destination/.local/state/dev-setup/backups/$(date -u +%Y%m%dT%H%M%SZ)-$$"
+# Only back up individual managed files; never recurse into application state.
+while IFS= read -r relative; do
+  [ -n "$relative" ] || continue
+  if [ -f "$destination/$relative" ]; then
+    mkdir -p "$backup_dir/$(dirname "$relative")"
+    cp -p "$destination/$relative" "$backup_dir/$relative"
+  fi
+done <<'TARGETS'
+{{ if .configureT3 -}}
+.t3/userdata/settings.json
+.t3/userdata/keybindings.json
+{{ end -}}
+{{ if .configureCodex -}}
+.codex/config.toml
+{{ end -}}
+{{ if and (eq .chezmoi.os "darwin") (ne .editor "none") -}}
+Library/Application Support/{{ if eq .editor "cursor" }}Cursor{{ else }}Code{{ end }}/User/settings.json
+Library/Application Support/{{ if eq .editor "cursor" }}Cursor{{ else }}Code{{ end }}/User/keybindings.json
+{{ end -}}
+{{ if .legacyNeovim -}}
+.config/nvim/init.lua
+.config/nvim/lua/user/vscode_keymaps.lua
+{{ end -}}
+TARGETS
+if [ -d "$backup_dir" ]; then
+  printf 'Saved existing configuration to %s\n' "$backup_dir"
+fi
+{{ end -}}

@@ -1,0 +1,30 @@
+{{ if and (eq .chezmoi.os "windows") (ne .editor "none") .installPackages -}}
+$ErrorActionPreference = 'Stop'
+$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + $env:Path
+$name = '{{ if eq .editor "cursor" }}cursor{{ else }}code{{ end }}.cmd'
+$command = Get-Command $name -ErrorAction SilentlyContinue
+if ($command) { $editorCommand = $command.Source } else {
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA '{{ if eq .editor "cursor" }}Programs/cursor/resources/app/bin/cursor.cmd{{ else }}Programs/Microsoft VS Code/bin/code.cmd{{ end }}')
+        (Join-Path $env:ProgramFiles '{{ if eq .editor "cursor" }}cursor/resources/app/bin/cursor.cmd{{ else }}Microsoft VS Code/bin/code.cmd{{ end }}')
+    )
+    $editorCommand = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+}
+if (-not $editorCommand) { throw 'Editor CLI not found; install it from the editor command palette and rerun chezmoi apply.' }
+$extensions = @(
+{{ range .extensions }}
+    '{{ . }}'
+{{ end }}
+{{ if eq .editor "cursor" }}
+    'anysphere.remote-ssh'
+    'anysphere.remote-wsl'
+{{ else }}
+    'ms-vscode-remote.remote-ssh'
+    'ms-vscode-remote.remote-wsl'
+{{ end }}
+)
+foreach ($extension in $extensions) {
+    & $editorCommand --install-extension $extension
+    if ($LASTEXITCODE -ne 0) { throw "Extension installation failed: $extension" }
+}
+{{ end -}}

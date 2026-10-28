@@ -1,0 +1,6 @@
+{
+  "window.autoDetectColorScheme": false,
+  "git.autofetch": true,
+  "workbench.iconTheme": "vscode-icons",
+  "window.commandCenter": 1
+}

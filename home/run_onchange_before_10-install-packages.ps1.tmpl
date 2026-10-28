@@ -1,0 +1,21 @@
+{{ if and .installPackages (eq .chezmoi.os "windows") -}}
+$ErrorActionPreference = 'Stop'
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { throw 'Install App Installer / WinGet first: https://aka.ms/getwinget' }
+$packages = @(
+{{ range .packages.windows.core }}
+    '{{ . }}'
+{{ end }}
+{{ if ne .editor "none" }}
+    '{{ index .packages.windows.editors .editor }}'
+{{ end }}
+{{ if .legacyNeovim }}
+    'Neovim.Neovim'
+{{ end }}
+)
+foreach ($id in $packages) {
+    & winget list --id $id --exact --accept-source-agreements --disable-interactivity | Out-Null
+    if ($LASTEXITCODE -eq 0) { Write-Host "Already installed: $id"; continue }
+    & winget install --id $id --exact --source winget --no-upgrade --accept-package-agreements --accept-source-agreements --disable-interactivity
+    if ($LASTEXITCODE -ne 0) { throw "WinGet failed for $id with exit code $LASTEXITCODE" }
+}
+{{ end -}}

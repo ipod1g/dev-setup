@@ -1,0 +1,10 @@
+{{- $defaultEditor := "cursor" -}}
+{{- if eq .chezmoi.os "linux" -}}{{- $defaultEditor = "none" -}}{{- end -}}
+# Machine-specific choices. Edit with: chezmoi edit-config
+[data]
+editor = {{ if hasKey . "editor" }}{{ .editor | quote }}{{ else }}{{ $defaultEditor | quote }}{{ end }}
+installPackages = {{ if hasKey . "installPackages" }}{{ .installPackages }}{{ else }}true{{ end }}
+installAgents = {{ if hasKey . "installAgents" }}{{ .installAgents }}{{ else }}true{{ end }}
+configureT3 = {{ if hasKey . "configureT3" }}{{ .configureT3 }}{{ else }}true{{ end }}
+configureCodex = {{ if hasKey . "configureCodex" }}{{ .configureCodex }}{{ else }}false{{ end }}
+legacyNeovim = {{ if hasKey . "legacyNeovim" }}{{ .legacyNeovim }}{{ else }}false{{ end }}

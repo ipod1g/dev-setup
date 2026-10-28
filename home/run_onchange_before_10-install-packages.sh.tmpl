@@ -1,0 +1,16 @@
+{{ if and .installPackages (eq .chezmoi.os "darwin") -}}
+#!/bin/sh
+set -eu
+command -v brew >/dev/null 2>&1 || { echo 'Install Homebrew first: https://brew.sh' >&2; exit 1; }
+brew bundle --no-upgrade --file=- <<'BREWFILE'
+{{ range .packages.macos.formulae -}}
+brew "{{ . }}"
+{{ end -}}
+{{ if ne .editor "none" -}}
+cask "{{ index .packages.macos.editors .editor }}"
+{{ end -}}
+{{ if .legacyNeovim -}}
+brew "neovim"
+{{ end -}}
+BREWFILE
+{{ end -}}

@@ -1,0 +1,20 @@
+{{ if and .installAgents (eq .chezmoi.os "windows") -}}
+$ErrorActionPreference = 'Stop'
+# Refresh PATH after WinGet installs, preserving any session-only additions.
+$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + $env:Path
+$env:Path = (Join-Path $env:USERPROFILE '.local/bin') + ';' + $env:Path
+if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
+    if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)) { throw 'Node.js/npm is required to install Codex.' }
+    & npm.cmd install --global @openai/codex
+    if ($LASTEXITCODE -ne 0) { throw 'Codex installation failed.' }
+}
+if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
+    Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
+    if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { throw 'Claude installation did not expose a claude command. Check ~/.local/bin and rerun.' }
+}
+if (-not (Get-Command t3 -ErrorAction SilentlyContinue)) {
+    Invoke-RestMethod https://t3.codes/install.ps1 | Invoke-Expression
+    if (-not (Get-Command t3 -ErrorAction SilentlyContinue)) { throw 'T3 installation did not expose a t3 command. Check ~/.local/bin and rerun.' }
+}
+Write-Host 'Sign in separately: codex, claude, and gh auth login.'
+{{ end -}}

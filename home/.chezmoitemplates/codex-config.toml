@@ -1,0 +1,7 @@
+# Reviewed portable preferences. Authentication and project trust stay local.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+service_tier = "default"
+
+[features]
+js_repl = false

@@ -1,0 +1,12 @@
+{
+  "packages": {
+    "macos": {
+      "formulae": ["git", "gh", "node@24"],
+      "editors": {"cursor": "cursor", "vscode": "visual-studio-code"}
+    },
+    "windows": {
+      "core": ["Git.Git", "GitHub.cli", "OpenJS.NodeJS.LTS"],
+      "editors": {"cursor": "Anysphere.Cursor", "vscode": "Microsoft.VisualStudioCode"}
+    }
+  }
+}
