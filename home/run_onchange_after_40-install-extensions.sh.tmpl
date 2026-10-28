@@ -13,13 +13,7 @@ if ! command -v "$editor_command" >/dev/null 2>&1; then
   fi
 fi
 [ -x "$editor_command" ] || command -v "$editor_command" >/dev/null 2>&1 || { echo 'Editor CLI not found; install it from the editor command palette and rerun chezmoi apply.' >&2; exit 1; }
-{{ range .extensions -}}
+{{ range index .editorExtensions .editor -}}
 "$editor_command" --install-extension {{ . | quote }}
-{{ end -}}
-{{ if eq .editor "cursor" -}}
-"$editor_command" --install-extension anysphere.remote-ssh
-"$editor_command" --install-extension anysphere.remote-wsl
-{{ else -}}
-"$editor_command" --install-extension ms-vscode-remote.remote-ssh
 {{ end -}}
 {{ end -}}

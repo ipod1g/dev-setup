@@ -45,7 +45,13 @@ When VS Code is selected and `installPackages = true`, the package scripts also 
 - `lazygit` and Neovim for the configured integrations. Neovim's historical init/keymaps remain separately opt-in through `legacyNeovim`; the current Mac init/keymaps have not been supplied.
 
 The Mac's external browser and external terminal preferences are retained. Arc and iTerm2 application installation is not added to the bootstrap at this stage.
-An extension's settings do not prove that it is currently installed. The installer still uses the earlier reviewed extension inventory; the user needs to supply `code --list-extensions` to confirm the complete Mac profile. In particular, VS Code Neovim, FindItFaster, lazygit, Custom UI Style, YAML, and other settings-referenced extensions should be checked against that inventory before declaring the editor fully reproduced.
+The user has now supplied the MacBook's `code --list-extensions` output: **56 installed extension IDs**. That exact inventory is stored under `editorExtensions.vscode` in [`extensions.json`](../home/.chezmoidata/extensions.json), and is requested by both macOS and Windows VS Code installers. Cursor keeps its earlier 16-extension inventory under `editorExtensions.cursor`. Capture updates preserve the other editor's inventory and do not remove listed remote extensions.
+
+The supplied inventory confirms VS Code Neovim, FindItFaster, lazygit, Custom UI Style, YAML, GitLens, Prettier, language support, and the other listed extensions. It includes Remote WSL but does not include Remote SSH; the installer requests the supplied IDs without adding Remote SSH. Extension packs can install additional dependencies.
+
+The list records installed IDs, without versions or enabled/disabled states. Both `asvetliakov.vscode-neovim` and `vscodevim.vim` are present, as are APC, Vibrancy Continued, and Custom UI Style. Preserve any intentional disabling or enablement choices from the Mac when validating a fresh installation. No extension was disabled or removed based on its name or on an inferred conflict.
+The settings also reference Copilot, Project Manager, Quickgrep, VS Code Pets, and AI Chat commands that are not present as explicit IDs in this export. Those settings remain preserved; extension installation is based on the supplied inventory.
+Language and container extensions do not provision their external SDKs or a Docker runtime. Add those tools from a reviewed application/project inventory when needed.
 
 [Custom UI Style](https://github.com/subframe7536/vscode-custom-ui-style#usage) applies CSS/Electron changes through its own backup and `Custom UI Style: Reload` commands. This bootstrap stores the preferences; it does not run those patching commands. Extension installation and editor startup on the actual Mac still need validation.
 
@@ -53,4 +59,4 @@ An extension's settings do not prove that it is currently installed. The install
 
 The automatic capture script still updates only its narrow allowlist. It now merges those captured preferences into the reviewed profile, preserving the full imported configuration and separate Mac overrides. Review additional settings manually before publishing them.
 
-The remaining inputs are the macOS version, current keyboard shortcuts, actual extension list, and any Mac-local T3 preferences that differ from the WSL-derived baseline.
+The remaining inputs are the macOS version, current keyboard shortcuts, any intended extension enablement states, the Mac's Neovim init/keymaps, and any Mac-local T3 preferences that differ from the WSL-derived baseline.

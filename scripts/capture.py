@@ -36,6 +36,22 @@ def update_json(path, updates):
     write_json(path, existing)
 
 
+def capture_extensions(path, editor):
+    if path.suffix.lower() == ".json":
+        records = read_jsonc(path)
+        ids = [x["identifier"]["id"] for x in records]
+    else:
+        raw = path.read_bytes()
+        encoding = "utf-16" if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
+        ids = [line.strip() for line in raw.decode(encoding).splitlines() if line.strip()]
+    if not all(isinstance(x, str) and re.fullmatch(r"[A-Za-z0-9_-]+\.[A-Za-z0-9_.-]+", x) for x in ids):
+        raise ValueError("Unexpected extension identifier; no extension snapshot was written")
+    target = REPO / "home/.chezmoidata/extensions.json"
+    data = read_jsonc(target) if target.is_file() else {"editorExtensions": {}}
+    data["editorExtensions"][editor] = sorted({x.lower() for x in ids})
+    write_json(target, data)
+
+
 def capture_editor(user_dir, extension_file, editor):
     templates = REPO / "home/.chezmoitemplates"
     settings_file = user_dir / "settings.json"
@@ -53,12 +69,7 @@ def capture_editor(user_dir, extension_file, editor):
         print(f"Not found; retained existing snapshot: {settings_file}")
     # Keybindings can invoke arbitrary shell commands. Review changes manually.
     if extension_file.is_file():
-        records = read_jsonc(extension_file)
-        ids = sorted({x["identifier"]["id"] for x in records})
-        if not all(re.fullmatch(r"[A-Za-z0-9_-]+\.[A-Za-z0-9_.-]+", x) for x in ids):
-            raise ValueError("Unexpected extension identifier; no extension snapshot was written")
-        ids = [x for x in ids if not x.startswith(("anysphere.remote-", "ms-vscode-remote."))]
-        write_json(REPO / "home/.chezmoidata/extensions.json", {"extensions": ids})
+        capture_extensions(extension_file, editor)
     else:
         print(f"Not found; retained extension snapshot: {extension_file}")
 
@@ -115,7 +126,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--editor", choices=("cursor", "vscode"), default="vscode")
     parser.add_argument("--editor-user-dir", type=Path)
-    parser.add_argument("--extensions-file", type=Path)
+    parser.add_argument("--extensions-file", type=Path, help="An extensions.json manifest or a .txt file containing code --list-extensions output")
     parser.add_argument("--t3-userdata", type=Path, default=Path.home() / ".t3/userdata")
     parser.add_argument("--codex-config", type=Path, default=Path.home() / ".codex/config.toml")
     args = parser.parse_args()

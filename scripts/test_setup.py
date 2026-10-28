@@ -232,6 +232,38 @@ class CaptureTests(unittest.TestCase):
             capture.capture_editor(self.root / "absent", self.root / "absent.json", "cursor")
         self.assertEqual(target.read_text(encoding="utf-8"), '{"keep": true}')
 
+    def test_extension_capture_keeps_editor_inventories_and_remote_ids(self):
+        target = self.root / "home/.chezmoidata/extensions.json"
+        target.parent.mkdir(parents=True)
+        for encoding in ("utf-8", "utf-8-sig", "utf-16"):
+            with self.subTest(encoding=encoding):
+                target.write_text(json.dumps({"editorExtensions": {"cursor": ["anysphere.remote-wsl"]}}), encoding="utf-8")
+                source = self.root / "extensions.txt"
+                source.write_text("MS-VSCODE-REMOTE.remote-wsl\npublisher.theme\npublisher.theme\n", encoding=encoding)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    capture.capture_extensions(source, "vscode")
+                data = json.loads(target.read_text(encoding="utf-8"))["editorExtensions"]
+                self.assertEqual(data["vscode"], ["ms-vscode-remote.remote-wsl", "publisher.theme"])
+                self.assertEqual(data["cursor"], ["anysphere.remote-wsl"])
+        manifest = self.root / "extensions.json"
+        manifest.write_text(json.dumps([{"identifier": {"id": "anysphere.remote-ssh"}}]), encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()):
+            capture.capture_extensions(manifest, "cursor")
+        data = json.loads(target.read_text(encoding="utf-8"))["editorExtensions"]
+        self.assertEqual(data["vscode"], ["ms-vscode-remote.remote-wsl", "publisher.theme"])
+        self.assertEqual(data["cursor"], ["anysphere.remote-ssh"])
+
+    def test_invalid_extension_capture_does_not_modify_inventory(self):
+        target = self.root / "home/.chezmoidata/extensions.json"
+        target.parent.mkdir(parents=True)
+        target.write_text(json.dumps({"editorExtensions": {"vscode": ["publisher.keep"]}}), encoding="utf-8")
+        original = target.read_bytes()
+        source = self.root / "extensions.txt"
+        source.write_text("publisher.valid\nnot-an-extension;run-command\n", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            capture.capture_extensions(source, "vscode")
+        self.assertEqual(target.read_bytes(), original)
+
 
 if __name__ == "__main__":
     if not CHEZMOI:

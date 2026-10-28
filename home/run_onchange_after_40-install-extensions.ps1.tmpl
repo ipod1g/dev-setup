@@ -12,15 +12,8 @@ if ($command) { $editorCommand = $command.Source } else {
 }
 if (-not $editorCommand) { throw 'Editor CLI not found; install it from the editor command palette and rerun chezmoi apply.' }
 $extensions = @(
-{{ range .extensions }}
+{{ range index .editorExtensions .editor }}
     '{{ . }}'
-{{ end }}
-{{ if eq .editor "cursor" }}
-    'anysphere.remote-ssh'
-    'anysphere.remote-wsl'
-{{ else }}
-    'ms-vscode-remote.remote-ssh'
-    'ms-vscode-remote.remote-wsl'
 {{ end }}
 )
 foreach ($extension in $extensions) {

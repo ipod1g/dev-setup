@@ -6,7 +6,7 @@ There is no custom package manager, Node runtime requirement for this repository
 
 This repository is separate from the [ipod1g GitHub profile](https://github.com/ipod1g/ipod1g).
 The default editor is **VS Code**, matching the current preferred editor. Cursor remains an optional alternative.
-The VS Code settings now use the current user-supplied MacBook configuration, with Mac-specific overrides. The initial extension inventory came from the Windows device inspected on 2026-10-28; the MacBook's installed extension list and keyboard shortcuts are still awaiting capture.
+The VS Code settings and 56-extension inventory now use the user-supplied MacBook configuration, with Mac-specific settings overrides. Cursor retains its separate Windows inventory. The MacBook's keyboard shortcuts are still awaiting capture.
 
 ## New device
 
@@ -77,11 +77,11 @@ Configuration files are restored as complete files, **not merged** with other lo
 ## What is preserved
 
 - The supplied MacBook VS Code settings: 160 shared preferences and six Mac-specific overrides, including Kimbie Dark, JetBrainsMono Nerd Font, relative line numbers, Prettier, custom UI styling, and FindItFaster preferences. See [the settings import notes](docs/macbook-settings.md).
-- Fourteen shared extension IDs from the inspected Windows Cursor installation. VS Code uses the corresponding Microsoft remote extensions; choosing Cursor restores its sixteen-extension baseline. The full Mac extension inventory is not yet supplied.
+- The 56 VS Code extension IDs supplied from the MacBook, used for VS Code on macOS and Windows. Choosing Cursor restores its separate sixteen-extension inventory from the inspected Windows device. Extension packs may install additional dependencies; extension versions and enabled/disabled states are not captured by this ID-only list.
 - T3 server preferences, model favorites, and the current complete keybinding baseline. `mod` maps to Command on macOS and Ctrl on Windows/Linux.
 - An optional, allowlisted Codex model configuration from native Windows, disabled by default; WSL had no model defaults to export.
 - The six original profile-repo configuration files under `legacy/`, retained as historical references and never installed by default.
-- Optional Neovim configuration, adapted from the old snapshot to use `stdpath("config")` and the stable Ctrl+O jump command. Enable the VS Code Neovim extension separately if using it.
+- Optional Neovim configuration, adapted from the old snapshot to use `stdpath("config")` and the stable Ctrl+O jump command. The supplied VS Code inventory includes VS Code Neovim; the Mac's current Neovim init/keymaps are still awaiting capture.
 
 The historical PowerShell profile is archived only: no equivalent active profile was found on the inspected device. Its Windows-specific `ls` alias and self-editing startup behavior are not applied automatically.
 No company repositories, project registrations, workspace databases, agent conversations, MCP credentials, or authenticated plugin installations are copied.
@@ -113,6 +113,15 @@ python3 scripts/capture.py \
 
 Use `--editor cursor` and the corresponding Cursor paths to capture Cursor instead. On macOS, the default VS Code settings source is `~/Library/Application Support/Code/User/`; use `--editor-user-dir` for a named profile's actual directory.
 
+Extension inventories are stored separately under `editorExtensions.vscode` and `editorExtensions.cursor` in `home/.chezmoidata/extensions.json`. Capturing one editor preserves the other editor's inventory, including its remote extensions. To capture the active VS Code profile's CLI list on macOS:
+
+```sh
+code --list-extensions > /tmp/dev-setup-vscode-extensions.txt
+python3 scripts/capture.py --extensions-file /tmp/dev-setup-vscode-extensions.txt
+```
+
+Add `--profile "<profile-name>"` to the `code` command for a named profile. The capture accepts either an extension JSON manifest or a plain text list; UTF-8 and Windows PowerShell's UTF-16 text exports are supported.
+
 Editor keybindings are deliberately reviewed manually because they can run arbitrary commands. Edit shared files under `home/.chezmoitemplates/` and package/extension lists under `home/.chezmoidata/`. Review `git diff`, then commit and push. Avoid broad `chezmoi add ~/.codex` or `chezmoi add ~/.t3` commands.
 
 ## Match the MacBook
@@ -131,7 +140,7 @@ brew list --cask
 ```
 
 Also review the active VS Code profile's user settings and keyboard shortcuts through **Preferences: Open User Settings (JSON)** and **Preferences: Open Keyboard Shortcuts (JSON)**. If using a named profile, export its extensions with `code --profile "<profile-name>" --list-extensions`.
-The supplied preferences establish zsh, iTerm2 as the external terminal, and JetBrainsMono Nerd Font. The macOS version, current VS Code extension list and keyboard shortcuts, and Mac-specific T3 preferences are still awaiting capture.
+The supplied preferences establish zsh, iTerm2 as the external terminal, and JetBrainsMono Nerd Font. The user settings and extension IDs are imported; the macOS version, current VS Code keyboard shortcuts, and Mac-specific T3 preferences are still awaiting capture.
 Review exports for credentials and private project paths before sharing or committing them to this public repository.
 
 ## Validation
