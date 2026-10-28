@@ -115,6 +115,8 @@ Editor keybindings are deliberately reviewed manually because they can run arbit
 
 ## Match the MacBook
 
+The MacBook is user-confirmed as **Apple M1 (Apple Silicon)**. T3 runs locally on the Mac and also connects to the Windows/WSL environment. Keep `configureT3 = true` on both the Mac and the WSL host; each has its own T3 state and provider logins. See [the MacBook setup guide](docs/macbook-setup.md) for this arrangement.
+
 The macOS path and installer support do not require access to the Mac. To match its actual setup, collect:
 
 ```sh
@@ -127,7 +129,7 @@ brew list --cask
 ```
 
 Also review the active VS Code profile's user settings and keyboard shortcuts through **Preferences: Open User Settings (JSON)** and **Preferences: Open Keyboard Shortcuts (JSON)**. If using a named profile, export its extensions with `code --profile "<profile-name>" --list-extensions`.
-For matching terminal behavior, note the shell, terminal app, and custom fonts. For T3, distinguish a server running locally on the Mac from a client connected to another machine.
+For matching terminal behavior, note the shell, terminal app, and custom fonts. The macOS version, active VS Code preferences, and Mac-specific T3 preferences are still awaiting capture.
 Review exports for credentials and private project paths before sharing or committing them to this public repository.
 
 ## Validation
