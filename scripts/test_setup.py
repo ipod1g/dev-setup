@@ -225,7 +225,7 @@ exit 23
                         self.assertIsNotNone(body)
                         brewfile = rendered / f"{system}-{arch}-Brewfile"
                         brewfile.write_text(body.group(1), encoding="utf-8")
-                        result = subprocess.run(["ruby", "--check", str(brewfile)], capture_output=True, text=True)
+                        result = subprocess.run(["ruby", "-c", str(brewfile)], capture_output=True, text=True)
                         self.assertEqual(result.returncode, 0, result.stderr)
         if sys.platform == "win32":
             parser = self.base / "parse.ps1"
