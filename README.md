@@ -9,14 +9,12 @@ The default editor is **Cursor**, matching the device inspected on 2026-10-28. V
 
 ## New device
 
-This is a private repository. First install the prerequisites and authenticate GitHub once.
+This repository is public. Install the prerequisites below; downloading the setup does not require a GitHub login.
 
 macOS, with [Homebrew](https://brew.sh) installed:
 
 ```sh
-brew install chezmoi git gh
-gh auth login
-gh auth setup-git
+brew install chezmoi git
 ```
 
 Windows, in PowerShell, with [WinGet](https://aka.ms/getwinget) installed:
@@ -24,10 +22,7 @@ Windows, in PowerShell, with [WinGet](https://aka.ms/getwinget) installed:
 ```powershell
 winget install --id twpayne.chezmoi --exact --source winget
 winget install --id Git.Git --exact --source winget
-winget install --id GitHub.cli --exact --source winget
 # Open a new PowerShell window so PATH includes the installed commands.
-gh auth login
-gh auth setup-git
 ```
 
 Then **the same command on either OS** restores the setup:
@@ -41,7 +36,7 @@ On macOS Node 24 LTS is selected; WinGet uses its current Node LTS package. This
 Existing applications are retained without a requested upgrade. Agent installs are skipped when their command is already available.
 
 The first apply can request OS administrator approval or acceptance of installer requirements.
-Sign in to **Codex**, **Claude Code**, and any editor services separately. Tokens, SSH keys, cookies, and subscriptions are never copied.
+Sign in to **Codex**, **Claude Code**, and any editor services separately. For private projects or authenticated GitHub operations, run `gh auth login`; use `gh auth setup-git` if Git should use that login. Tokens, SSH keys, cookies, and subscriptions are never copied.
 Add `~/.local/bin` to PATH if the upstream agent installers request it. On Intel Macs, T3's desktop app is installed through Homebrew; install its `t3` command from the app's Settings → General → About. Upstream has no standalone Intel Mac server binary.
 
 ## Preview or customize
