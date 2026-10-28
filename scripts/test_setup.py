@@ -15,7 +15,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEZMOI = os.environ.get("CHEZMOI_BIN") or shutil.which("chezmoi")
-DEFAULTS = dict(editor="cursor", installPackages=False, installAgents=False,
+DEFAULTS = dict(editor="vscode", installPackages=False, installAgents=False,
                 configureT3=True, configureCodex=False, legacyNeovim=False)
 NATIVE_OS = {"win32": "windows", "darwin": "darwin"}.get(sys.platform, "linux")
 spec = importlib.util.spec_from_file_location("capture", ROOT / "scripts/capture.py")

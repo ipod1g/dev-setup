@@ -1,4 +1,4 @@
-{{- $defaultEditor := "cursor" -}}
+{{- $defaultEditor := "vscode" -}}
 {{- if eq .chezmoi.os "linux" -}}{{- $defaultEditor = "none" -}}{{- end -}}
 # Machine-specific choices. Edit with: chezmoi edit-config
 [data]

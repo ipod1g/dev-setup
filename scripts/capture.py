@@ -106,7 +106,7 @@ def capture_codex(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--editor", choices=("cursor", "vscode"), default="cursor")
+    parser.add_argument("--editor", choices=("cursor", "vscode"), default="vscode")
     parser.add_argument("--editor-user-dir", type=Path)
     parser.add_argument("--extensions-file", type=Path)
     parser.add_argument("--t3-userdata", type=Path, default=Path.home() / ".t3/userdata")

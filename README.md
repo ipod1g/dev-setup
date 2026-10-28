@@ -5,7 +5,8 @@ Homebrew and WinGet install applications; chezmoi restores the reviewed settings
 There is no custom package manager, Node runtime requirement for this repository, or background sync service.
 
 This repository is separate from the [ipod1g GitHub profile](https://github.com/ipod1g/ipod1g).
-The default editor is **Cursor**, matching the device inspected on 2026-10-28. VS Code is an optional alternative.
+The default editor is **VS Code**, matching the current preferred editor. Cursor remains an optional alternative.
+The initial settings and extension snapshots came from the Windows device inspected on 2026-10-28; the MacBook's current VS Code configuration has not yet been captured.
 
 ## New device
 
@@ -54,7 +55,7 @@ chezmoi apply
 The machine's `chezmoi.toml` has these choices under `[data]`:
 
 ```toml
-editor = "cursor"          # "cursor", "vscode", or "none"
+editor = "vscode"          # "vscode", "cursor", or "none"
 installPackages = true    # Homebrew/WinGet apps and editor extensions
 installAgents = true      # Codex, Claude Code, and T3 Code
 configureT3 = true        # Preferences and shortcuts, on the SERVER machine
@@ -63,6 +64,7 @@ legacyNeovim = false     # Optional historical VS Code Neovim integration
 ```
 
 Set both installation flags to `false` for a configuration-only restore.
+Existing installations retain their editor choice. To switch an existing Cursor setup, run `chezmoi edit-config`, set `editor = "vscode"`, then review `chezmoi diff` and run `chezmoi apply`.
 Set `configureT3 = false` on Windows if T3 runs exclusively in WSL.
 Linux/WSL defaults to `editor = "none"`: no Windows editor configuration is written from Linux.
 Run chezmoi separately inside WSL to restore the T3 server's preferences. This repo does not install a WSL distribution or provision Linux system packages; provide Git, curl, Bash, and Node/npm there before enabling agent installation.
@@ -73,7 +75,7 @@ Configuration files are restored as complete files, **not merged** with other lo
 
 ## What is preserved
 
-- Cursor's inspected settings and 16 installed extension IDs. The VS Code alternative uses the three shared settings and the corresponding Microsoft remote extensions.
+- Fourteen shared extension IDs and three portable editor settings from the inspected Windows Cursor installation. VS Code is installed by default with the corresponding Microsoft remote extensions; choosing Cursor restores its sixteen-extension baseline.
 - T3 server preferences, model favorites, and the current complete keybinding baseline. `mod` maps to Command on macOS and Ctrl on Windows/Linux.
 - An optional, allowlisted Codex model configuration from native Windows, disabled by default; WSL had no model defaults to export.
 - The six original profile-repo configuration files under `legacy/`, retained as historical references and never installed by default.
@@ -97,17 +99,36 @@ python scripts/capture.py          # On Windows; use python3 on macOS/Linux
 git diff
 ```
 
-The capture script reads only selected settings files and the extension manifest, writes only allowlisted preferences, and skips absent sources. It supports comments and trailing commas in editor JSON.
-For this Windows/WSL split, run inside WSL with explicit Windows editor sources:
+The capture script defaults to VS Code. It reads only selected settings files and the extension manifest, writes only allowlisted preferences, and skips absent sources. It supports comments and trailing commas in editor JSON.
+For a Windows/WSL split, run inside WSL with explicit Windows VS Code sources:
 
 ```sh
 python3 scripts/capture.py \
-  --editor-user-dir /mnt/c/Users/<user>/AppData/Roaming/Cursor/User \
-  --extensions-file /mnt/c/Users/<user>/.cursor/extensions/extensions.json \
+  --editor-user-dir /mnt/c/Users/<user>/AppData/Roaming/Code/User \
+  --extensions-file /mnt/c/Users/<user>/.vscode/extensions/extensions.json \
   --codex-config /mnt/c/Users/<user>/.codex/config.toml
 ```
 
+Use `--editor cursor` and the corresponding Cursor paths to capture Cursor instead. On macOS, the default VS Code settings source is `~/Library/Application Support/Code/User/`; use `--editor-user-dir` for a named profile's actual directory.
+
 Editor keybindings are deliberately reviewed manually because they can run arbitrary commands. Edit shared files under `home/.chezmoitemplates/` and package/extension lists under `home/.chezmoidata/`. Review `git diff`, then commit and push. Avoid broad `chezmoi add ~/.codex` or `chezmoi add ~/.t3` commands.
+
+## Match the MacBook
+
+The macOS path and installer support do not require access to the Mac. To match its actual setup, collect:
+
+```sh
+uname -m
+sw_vers -productVersion
+code --list-extensions
+# Optional: compare the Mac's application and CLI selections.
+brew leaves
+brew list --cask
+```
+
+Also review the active VS Code profile's user settings and keyboard shortcuts through **Preferences: Open User Settings (JSON)** and **Preferences: Open Keyboard Shortcuts (JSON)**. If using a named profile, export its extensions with `code --profile "<profile-name>" --list-extensions`.
+For matching terminal behavior, note the shell, terminal app, and custom fonts. For T3, distinguish a server running locally on the Mac from a client connected to another machine.
+Review exports for credentials and private project paths before sharing or committing them to this public repository.
 
 ## Validation
 
