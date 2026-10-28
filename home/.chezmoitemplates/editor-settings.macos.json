@@ -1,0 +1,15 @@
+{
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.external.osxExec": "iTerm2.app",
+  "custom-ui-style.electron": {
+    "transparent": false,
+    "frame": false,
+    "vibrancy": "ultra-dark",
+    "visualEffectState": "active"
+  },
+  "workbench.externalBrowser": "Arc",
+  "find-it-faster.general.shellPathForTerminal": "/bin/bash",
+  "terminal.integrated.env.osx": {
+    "FIG_NEW_SESSION": "1"
+  }
+}

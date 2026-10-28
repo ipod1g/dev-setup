@@ -8,7 +8,11 @@ $packages = @(
 {{ if ne .editor "none" }}
     '{{ index .packages.windows.editors .editor }}'
 {{ end }}
-{{ if .legacyNeovim }}
+{{ if eq .editor "vscode" }}
+{{ range .packages.windows.vscodeTools }}
+    '{{ . }}'
+{{ end }}
+{{ else if .legacyNeovim }}
     'Neovim.Neovim'
 {{ end }}
 )

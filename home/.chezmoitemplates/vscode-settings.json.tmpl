@@ -1,0 +1,5 @@
+{{- $settings := include ".chezmoitemplates/editor-settings.json" | fromJson -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{- $settings = mergeOverwrite $settings (include ".chezmoitemplates/editor-settings.macos.json" | fromJson) -}}
+{{- end -}}
+{{ $settings | toPrettyJson }}

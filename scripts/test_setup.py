@@ -81,6 +81,29 @@ class SetupTests(unittest.TestCase):
                 self.assertIn('stdpath("config")', keys)
                 self.assertNotIn("<SNR>", keys)
 
+    def test_macbook_settings_are_portable(self):
+        mac = self.dump("darwin")
+        windows = self.dump("windows")
+        mac_settings = json.loads(mac["Library/Application Support/Code/User/settings.json"]["contents"])
+        win_settings = json.loads(windows["AppData/Roaming/Code/User/settings.json"]["contents"])
+        self.assertEqual(mac_settings["terminal.integrated.defaultProfile.osx"], "zsh")
+        self.assertEqual(mac_settings["custom-ui-style.electron"]["vibrancy"], "ultra-dark")
+        self.assertEqual(mac_settings["find-it-faster.general.shellPathForTerminal"], "/bin/bash")
+        for key in ("terminal.integrated.defaultProfile.osx", "terminal.external.osxExec", "terminal.integrated.env.osx", "custom-ui-style.electron", "workbench.externalBrowser", "find-it-faster.general.shellPathForTerminal"):
+            self.assertNotIn(key, win_settings)
+        for settings in (mac_settings, win_settings):
+            self.assertEqual(settings["editor.fontSize"], 13)
+            self.assertEqual(settings["editor.lineNumbers"], "relative")
+            self.assertEqual(settings["[typescript]"]["editor.defaultFormatter"], "esbenp.prettier-vscode")
+            self.assertEqual(settings["errorLens.messageTemplate"], "$message - $source")
+            self.assertIn("{1}  --highlight-line {2}", settings["find-it-faster.findWithinFiles.previewCommand"])
+            self.assertEqual(settings["yaml.schemas"], {"https://api.bitbucket.org/schemas/pipelines-configuration": "bitbucket-pipelines.yml"})
+            self.assertFalse(any(key.startswith("cursor.") for key in settings))
+            self.assertNotIn("file:///Users/", json.dumps(settings))
+        cursor = self.dump("darwin", editor="cursor")
+        cursor_settings = json.loads(cursor["Library/Application Support/Cursor/User/settings.json"]["contents"])
+        self.assertNotIn("custom-ui-style.stylesheet", cursor_settings)
+
     def test_invalid_editor_rejected(self):
         result = self.chez("managed", data={"editor": "typo"}, check=False)
         self.assertNotEqual(result.returncode, 0)
@@ -190,6 +213,17 @@ class CaptureTests(unittest.TestCase):
                 self.assertNotIn("DO-NOT-COPY", text)
                 self.assertNotIn("private-path", text)
                 self.assertNotIn("trust_level", text)
+
+    def test_partial_capture_preserves_reviewed_profile(self):
+        target = self.root / "home/.chezmoitemplates/editor-settings.json"
+        target.write_text(json.dumps({"editor.fontSize": 13, "editor.lineNumbers": "relative", "git.autofetch": False}), encoding="utf-8")
+        user = self.root / "user"
+        user.mkdir()
+        (user / "settings.json").write_text(json.dumps({"git.autofetch": True, "editor.fontSize": 99, "apiKey": "DO-NOT-COPY"}), encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()):
+            capture.capture_editor(user, self.root / "missing.json", "vscode")
+        result = json.loads(target.read_text(encoding="utf-8"))
+        self.assertEqual(result, {"editor.fontSize": 13, "editor.lineNumbers": "relative", "git.autofetch": True})
 
     def test_missing_sources_preserve_existing_snapshot(self):
         target = self.root / "home/.chezmoitemplates/editor-settings.json"

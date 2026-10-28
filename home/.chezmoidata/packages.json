@@ -2,10 +2,16 @@
   "packages": {
     "macos": {
       "formulae": ["git", "gh", "node@24"],
+      "vscodeFormulae": ["bat", "fzf", "ripgrep", "lazygit", "neovim"],
+      "vscodeCasks": ["font-jetbrains-mono-nerd-font"],
       "editors": {"cursor": "cursor", "vscode": "visual-studio-code"}
     },
     "windows": {
       "core": ["Git.Git", "GitHub.cli", "OpenJS.NodeJS.LTS"],
+      "vscodeTools": [
+        "DEVCOM.JetBrainsMonoNerdFont", "sharkdp.bat", "junegunn.fzf",
+        "BurntSushi.ripgrep.MSVC", "JesseDuffield.lazygit", "Neovim.Neovim"
+      ],
       "editors": {"cursor": "Anysphere.Cursor", "vscode": "Microsoft.VisualStudioCode"}
     }
   }

@@ -29,19 +29,26 @@ def write_json(path, data):
     print(f"Updated {path.relative_to(REPO)}")
 
 
+def update_json(path, updates):
+    # Partial captures must not truncate a previously reviewed full profile.
+    existing = read_jsonc(path) if path.is_file() else {}
+    existing.update(updates)
+    write_json(path, existing)
+
+
 def capture_editor(user_dir, extension_file, editor):
     templates = REPO / "home/.chezmoitemplates"
     settings_file = user_dir / "settings.json"
     if settings_file.is_file():
         data = read_jsonc(settings_file)
         shared = {k: v for k, v in data.items() if k in EDITOR_KEYS}
-        write_json(templates / "editor-settings.json", shared)
+        update_json(templates / "editor-settings.json", shared)
         if editor == "cursor":
             cursor = dict(shared)
             if "window.commandCenter" in data:
                 cursor["window.commandCenter"] = data["window.commandCenter"]
-            write_json(templates / "cursor-settings.json", cursor)
-        print("Other editor settings were omitted; review any additions individually.")
+            update_json(templates / "cursor-settings.json", cursor)
+        print("Other source settings were omitted; existing reviewed settings were preserved. Review additions individually.")
     else:
         print(f"Not found; retained existing snapshot: {settings_file}")
     # Keybindings can invoke arbitrary shell commands. Review changes manually.

@@ -6,7 +6,7 @@ There is no custom package manager, Node runtime requirement for this repository
 
 This repository is separate from the [ipod1g GitHub profile](https://github.com/ipod1g/ipod1g).
 The default editor is **VS Code**, matching the current preferred editor. Cursor remains an optional alternative.
-The initial settings and extension snapshots came from the Windows device inspected on 2026-10-28; the MacBook's current VS Code configuration has not yet been captured.
+The VS Code settings now use the current user-supplied MacBook configuration, with Mac-specific overrides. The initial extension inventory came from the Windows device inspected on 2026-10-28; the MacBook's installed extension list and keyboard shortcuts are still awaiting capture.
 
 ## New device
 
@@ -33,6 +33,7 @@ chezmoi init --apply https://github.com/ipod1g/dev-setup.git
 ```
 
 It installs Git, GitHub CLI, Node LTS, the selected editor and extensions, Codex, Claude Code, and T3 Code.
+Choosing VS Code also installs JetBrainsMono Nerd Font, Neovim, lazygit, and the `bat`, `fzf`, and `ripgrep` tools used by the supplied settings. Cursor retains its smaller baseline. Arc and iTerm2 are referenced by the Mac preferences but are not automatically installed.
 On macOS Node 24 LTS is selected; WinGet uses its current Node LTS package. This is a reproducible selection of tools and settings, not a lock of every application version.
 Existing applications are retained without a requested upgrade. Agent installs are skipped when their command is already available.
 
@@ -75,7 +76,8 @@ Configuration files are restored as complete files, **not merged** with other lo
 
 ## What is preserved
 
-- Fourteen shared extension IDs and three portable editor settings from the inspected Windows Cursor installation. VS Code is installed by default with the corresponding Microsoft remote extensions; choosing Cursor restores its sixteen-extension baseline.
+- The supplied MacBook VS Code settings: 160 shared preferences and six Mac-specific overrides, including Kimbie Dark, JetBrainsMono Nerd Font, relative line numbers, Prettier, custom UI styling, and FindItFaster preferences. See [the settings import notes](docs/macbook-settings.md).
+- Fourteen shared extension IDs from the inspected Windows Cursor installation. VS Code uses the corresponding Microsoft remote extensions; choosing Cursor restores its sixteen-extension baseline. The full Mac extension inventory is not yet supplied.
 - T3 server preferences, model favorites, and the current complete keybinding baseline. `mod` maps to Command on macOS and Ctrl on Windows/Linux.
 - An optional, allowlisted Codex model configuration from native Windows, disabled by default; WSL had no model defaults to export.
 - The six original profile-repo configuration files under `legacy/`, retained as historical references and never installed by default.
@@ -99,7 +101,7 @@ python scripts/capture.py          # On Windows; use python3 on macOS/Linux
 git diff
 ```
 
-The capture script defaults to VS Code. It reads only selected settings files and the extension manifest, writes only allowlisted preferences, and skips absent sources. It supports comments and trailing commas in editor JSON.
+The capture script defaults to VS Code. It reads only selected settings files and the extension manifest, updates only allowlisted preferences, and skips absent sources. Partial captures preserve the rest of the reviewed profile and its Mac overrides. It supports comments and trailing commas in editor JSON; newly supplied settings beyond the narrow automatic allowlist are reviewed and imported separately.
 For a Windows/WSL split, run inside WSL with explicit Windows VS Code sources:
 
 ```sh
@@ -129,7 +131,7 @@ brew list --cask
 ```
 
 Also review the active VS Code profile's user settings and keyboard shortcuts through **Preferences: Open User Settings (JSON)** and **Preferences: Open Keyboard Shortcuts (JSON)**. If using a named profile, export its extensions with `code --profile "<profile-name>" --list-extensions`.
-For matching terminal behavior, note the shell, terminal app, and custom fonts. The macOS version, active VS Code preferences, and Mac-specific T3 preferences are still awaiting capture.
+The supplied preferences establish zsh, iTerm2 as the external terminal, and JetBrainsMono Nerd Font. The macOS version, current VS Code extension list and keyboard shortcuts, and Mac-specific T3 preferences are still awaiting capture.
 Review exports for credentials and private project paths before sharing or committing them to this public repository.
 
 ## Validation

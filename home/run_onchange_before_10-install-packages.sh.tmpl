@@ -9,7 +9,14 @@ brew "{{ . }}"
 {{ if ne .editor "none" -}}
 cask "{{ index .packages.macos.editors .editor }}"
 {{ end -}}
-{{ if .legacyNeovim -}}
+{{ if eq .editor "vscode" -}}
+{{ range .packages.macos.vscodeFormulae -}}
+brew "{{ . }}"
+{{ end -}}
+{{ range .packages.macos.vscodeCasks -}}
+cask "{{ . }}"
+{{ end -}}
+{{ else if .legacyNeovim -}}
 brew "neovim"
 {{ end -}}
 BREWFILE
