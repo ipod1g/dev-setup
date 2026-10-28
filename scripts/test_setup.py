@@ -205,6 +205,25 @@ exit 23
                 if "install-" in name:
                     self.assertFalse(item.get("contents", "").strip())
 
+    def test_mac_app_opt_out_keeps_development_setup(self):
+        enabled = self.dump("darwin", installPackages=True, installMacApps=True)
+        disabled = self.dump("darwin", installPackages=True, installMacApps=False)
+        legacy = self.dump("darwin", installPackages=True)
+        for name in ("10-install-packages.sh", "20-install-app-store.sh"):
+            self.assertEqual(legacy[name]["contents"], enabled[name]["contents"])
+        packages = disabled["10-install-packages.sh"]["contents"]
+        for app in ("raycast", "scroll-reverser", "openusage"):
+            self.assertIn(f'cask "{app}"', enabled["10-install-packages.sh"]["contents"])
+            self.assertNotIn(f'cask "{app}"', packages)
+        self.assertIn('brew "mas"', enabled["10-install-packages.sh"]["contents"])
+        self.assertNotIn('brew "mas"', packages)
+        self.assertFalse(disabled.get("20-install-app-store.sh", {}).get("contents", "").strip())
+        for tool in ("git", "gh", "node@24", "fish"):
+            self.assertIn(f'brew "{tool}"', packages)
+        self.assertIn('cask "visual-studio-code"', packages)
+        self.assertTrue(disabled["40-install-extensions.sh"]["contents"].strip())
+        self.assertIn(".config/fish/conf.d/10-dev-setup.fish", disabled)
+
     def test_rendered_installers_parse_without_executing(self):
         rendered = self.base / "rendered"
         rendered.mkdir()

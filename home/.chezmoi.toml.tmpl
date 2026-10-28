@@ -5,6 +5,7 @@
 editor = {{ if hasKey . "editor" }}{{ .editor | quote }}{{ else }}{{ $defaultEditor | quote }}{{ end }}
 macFishPath = {{ if hasKey . "macFishPath" }}{{ .macFishPath | quote }}{{ else }}""{{ end }}
 installPackages = {{ if hasKey . "installPackages" }}{{ .installPackages }}{{ else }}true{{ end }}
+installMacApps = {{ if hasKey . "installMacApps" }}{{ .installMacApps }}{{ else }}true{{ end }}
 installAgents = {{ if hasKey . "installAgents" }}{{ .installAgents }}{{ else }}true{{ end }}
 configureT3 = {{ if hasKey . "configureT3" }}{{ .configureT3 }}{{ else }}true{{ end }}
 configureCodex = {{ if hasKey . "configureCodex" }}{{ .configureCodex }}{{ else }}false{{ end }}

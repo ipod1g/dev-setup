@@ -34,7 +34,7 @@ chezmoi init --apply https://github.com/ipod1g/dev-setup.git
 
 It installs Git, GitHub CLI, Node LTS, the selected editor and extensions, Codex, Claude Code, and T3 Code.
 Choosing VS Code also installs JetBrainsMono Nerd Font, Neovim, lazygit, and the `bat`, `fzf`, and `ripgrep` tools used by the supplied settings. Cursor retains its smaller baseline. Arc and iTerm2 are referenced by the Mac preferences but are not automatically installed.
-On macOS, the bootstrap also installs Fish, Raycast, Scroll Reverser, OpenUsage, and the `mas` CLI, then attempts to install RunCat Neo from the Mac App Store. A pending App Store sign-in is reported and retried on the next apply while the rest of setup continues. Existing editor and utility apps in `/Applications` or `~/Applications` are retained. See [Fish and Mac app preferences](docs/mac-shell-and-apps.md).
+Fish is part of the Mac development setup. The optional Mac app bundle installs Raycast, Scroll Reverser, OpenUsage, and the `mas` CLI, then attempts to install RunCat Neo from the Mac App Store. It is enabled by default; set `installMacApps = false` to skip the bundle. A pending App Store sign-in is reported and retried on the next apply while the rest of setup continues. Existing editor and utility apps in `/Applications` or `~/Applications` are retained. See [Fish and Mac app preferences](docs/mac-shell-and-apps.md).
 On macOS Node 24 LTS is selected; WinGet uses its current Node LTS package. This is a reproducible selection of tools and settings, not a lock of every application version.
 Existing applications are retained without a requested upgrade. Agent installs are skipped when their command is already available.
 
@@ -60,13 +60,15 @@ The machine's `chezmoi.toml` has these choices under `[data]`:
 editor = "vscode"          # "vscode", "cursor", or "none"
 macFishPath = ""          # Optional custom Fish path; standard Homebrew path is automatic
 installPackages = true    # Homebrew/WinGet apps and editor extensions
+installMacApps = true     # Optional Raycast, Scroll Reverser, OpenUsage, and RunCat Neo bundle
 installAgents = true      # Codex, Claude Code, and T3 Code
 configureT3 = true        # Preferences and shortcuts, on the SERVER machine
 configureCodex = false   # Optional native Windows model preferences; needs account access
 legacyNeovim = false     # Optional historical VS Code Neovim integration
 ```
 
-Set both installation flags to `false` for a configuration-only restore.
+Set `installPackages` and `installAgents` to `false` for a configuration-only restore.
+`installPackages` is the master package-install switch. Keep it `true` and set `installMacApps = false` for development tools without the personal Mac apps or App Store step. Existing configurations without `installMacApps` retain the enabled default. Changing the flag does not uninstall existing apps or remove their preferences.
 Existing installations retain their editor choice. To switch an existing Cursor setup, run `chezmoi edit-config`, set `editor = "vscode"`, then review `chezmoi diff` and run `chezmoi apply`.
 Set `configureT3 = false` on Windows if T3 runs exclusively in WSL.
 Linux/WSL defaults to `editor = "none"`: no Windows editor configuration is written from Linux.

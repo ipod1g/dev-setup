@@ -1,4 +1,4 @@
-{{ if and .installPackages (eq .chezmoi.os "darwin") -}}
+{{ if and .installPackages (eq .chezmoi.os "darwin") (or (not (hasKey . "installMacApps")) .installMacApps) -}}
 #!/bin/sh
 set -eu
 os_version=$(sw_vers -productVersion)

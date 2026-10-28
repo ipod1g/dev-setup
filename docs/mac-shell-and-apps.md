@@ -4,7 +4,8 @@ The user reports an M1 MacBook running macOS 27.0.1, with Fish, RunCat Neo, Scro
 
 ## What the bootstrap handles
 
-Homebrew installs `fish`, `mas`, `raycast`, `scroll-reverser`, and `openusage` on the Mac, alongside the existing development tools. Existing editor and utility apps in `/Applications` or `~/Applications` are retained without an attempted cask replacement.
+Fish belongs to the development setup. The optional Mac app bundle installs `mas`, `raycast`, `scroll-reverser`, and `openusage`, and attempts the RunCat Neo App Store installation. It defaults to enabled for the personal Mac. To skip it, run `chezmoi edit-config` and set `installMacApps = false` under `[data]` while keeping `installPackages = true`. This retains Fish and the development tools, and disables the App Store step. Existing configurations without the new flag keep the enabled default.
+Existing editor and utility apps in `/Applications` or `~/Applications` are retained without an attempted cask replacement. Disabling the bundle does not uninstall apps or remove their settings.
 VS Code uses Fish with the standard Apple Silicon or Intel Homebrew binary path. For a custom prefix, set `macFishPath` in `chezmoi edit-config`. Windows and WSL shell choices are unchanged. FindItFaster retains its separate Bash helper setting.
 
 The single managed file `~/.config/fish/conf.d/10-dev-setup.fish` loads Homebrew's Fish environment and adds Node 24 LTS and `~/.local/bin` to the session PATH. Repeated sourcing does not duplicate those paths, and it does not write universal variables. An existing copy is backed up before replacement. The personal `config.fish`, other `conf.d` files, functions, and plugins are not replaced.

@@ -6,8 +6,13 @@ brew bundle --no-upgrade --file=- <<'BREWFILE'
 {{ range .packages.macos.formulae -}}
 brew "{{ . }}"
 {{ end -}}
+{{ if or (not (hasKey . "installMacApps")) .installMacApps -}}
+{{ range .packages.macos.appFormulae -}}
+brew "{{ . }}"
+{{ end -}}
 {{ range .packages.macos.apps -}}
 cask "{{ .cask }}" unless ["/Applications/{{ .app }}", File.expand_path("~/Applications/{{ .app }}")].any? { |path| File.directory?(path) }
+{{ end -}}
 {{ end -}}
 {{ if ne .editor "none" -}}
 cask "{{ index .packages.macos.editors .editor }}" unless ["/Applications/{{ index .packages.macos.editorApps .editor }}", File.expand_path("~/Applications/{{ index .packages.macos.editorApps .editor }}")].any? { |path| File.directory?(path) }

@@ -16,6 +16,7 @@ Keep these choices in the Mac's `chezmoi edit-config` configuration:
 editor = "vscode"
 macFishPath = ""
 installPackages = true
+installMacApps = true
 installAgents = true
 configureT3 = true
 configureCodex = false
@@ -23,6 +24,7 @@ legacyNeovim = false
 ```
 
 These are the defaults for a new macOS setup. They install the local development tools and T3 CLI, and manage the local T3 preferences under `~/.t3/userdata/`.
+For a minimal or work-device setup, set `installMacApps = false` to skip Raycast, Scroll Reverser, OpenUsage, RunCat Neo, and the `mas` helper. Fish and the development tools remain selected.
 The optional Codex settings remain disabled so that the native Windows snapshot does not replace the Mac's preferences.
 On an existing MacBook, review/export its current preferences before applying the repository's baseline.
 The supplied VS Code settings are split into shared settings and Mac overrides; see [the import notes](macbook-settings.md) for the font/tool dependencies and extension inventory.
