@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a checksum-verified chezmoi release into the CI temporary directory."""
+"""Place verified chezmoi and Linux Fish test binaries in a temporary directory."""
 import hashlib
 import io
 import os
@@ -44,3 +44,26 @@ if "GITHUB_ENV" in os.environ:
     with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
         env.write(f"CHEZMOI_BIN={target}\n")
 print(f"Verified chezmoi {VERSION}: {target}")
+
+# Linux provides a portable Fish binary for syntax/startup checks. This does not
+# install a shell into the runner's system or change its login shell.
+if system == "linux":
+    fish_version = "4.9.3"
+    fish_arch, fish_digest = {
+        "amd64": ("x86_64", "8f643d10ad1abb0ef7072764c01ceb5cf61b2d373fda400cf60f0bad69b7e095"),
+        "arm64": ("aarch64", "57349f0111728c64b703a84e611aa97ff4d1fa8466385d64e67bd5bc3ffa49fc"),
+    }[arch]
+    fish_url = f"https://github.com/fish-shell/fish-shell/releases/download/{fish_version}/fish-{fish_version}-linux-{fish_arch}.tar.xz"
+    with urllib.request.urlopen(fish_url, timeout=90) as response:
+        fish_payload = response.read()
+    if hashlib.sha256(fish_payload).hexdigest() != fish_digest:
+        raise SystemExit("Portable Fish archive failed SHA256 verification")
+    with tarfile.open(fileobj=io.BytesIO(fish_payload)) as data:
+        fish_executable = data.extractfile("fish").read()
+    fish_target = destination / "fish"
+    fish_target.write_bytes(fish_executable)
+    fish_target.chmod(0o755)
+    if "GITHUB_ENV" in os.environ:
+        with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
+            env.write(f"FISH_BIN={fish_target}\n")
+    print(f"Verified portable Fish {fish_version}: {fish_target}")

@@ -27,6 +27,9 @@ Library/Application Support/{{ if eq .editor "cursor" }}Cursor{{ else }}Code{{ e
 .config/nvim/init.lua
 .config/nvim/lua/user/vscode_keymaps.lua
 {{ end -}}
+{{ if eq .chezmoi.os "darwin" -}}
+.config/fish/conf.d/10-dev-setup.fish
+{{ end -}}
 TARGETS
 if [ -d "$backup_dir" ]; then
   printf 'Saved existing configuration to %s\n' "$backup_dir"

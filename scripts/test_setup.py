@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -15,6 +16,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEZMOI = os.environ.get("CHEZMOI_BIN") or shutil.which("chezmoi")
+FISH = os.environ.get("FISH_BIN") or shutil.which("fish")
 DEFAULTS = dict(editor="vscode", installPackages=False, installAgents=False,
                 configureT3=True, configureCodex=False, legacyNeovim=False)
 NATIVE_OS = {"win32": "windows", "darwin": "darwin"}.get(sys.platform, "linux")
@@ -86,10 +88,10 @@ class SetupTests(unittest.TestCase):
         windows = self.dump("windows")
         mac_settings = json.loads(mac["Library/Application Support/Code/User/settings.json"]["contents"])
         win_settings = json.loads(windows["AppData/Roaming/Code/User/settings.json"]["contents"])
-        self.assertEqual(mac_settings["terminal.integrated.defaultProfile.osx"], "zsh")
+        self.assertEqual(mac_settings["terminal.integrated.defaultProfile.osx"], "fish")
         self.assertEqual(mac_settings["custom-ui-style.electron"]["vibrancy"], "ultra-dark")
         self.assertEqual(mac_settings["find-it-faster.general.shellPathForTerminal"], "/bin/bash")
-        for key in ("terminal.integrated.defaultProfile.osx", "terminal.external.osxExec", "terminal.integrated.env.osx", "custom-ui-style.electron", "workbench.externalBrowser", "find-it-faster.general.shellPathForTerminal"):
+        for key in ("terminal.integrated.defaultProfile.osx", "terminal.integrated.profiles.osx", "terminal.external.osxExec", "terminal.integrated.env.osx", "custom-ui-style.electron", "workbench.externalBrowser", "find-it-faster.general.shellPathForTerminal"):
             self.assertNotIn(key, win_settings)
         for settings in (mac_settings, win_settings):
             self.assertEqual(settings["editor.fontSize"], 13)
@@ -108,6 +110,74 @@ class SetupTests(unittest.TestCase):
         result = self.chez("managed", data={"editor": "typo"}, check=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("editor must be", result.stderr)
+
+    def test_fish_profile_paths_and_platform_isolation(self):
+        for arch, expected in [("arm64", "/opt/homebrew/bin/fish"), ("amd64", "/usr/local/bin/fish")]:
+            with self.subTest(arch=arch):
+                dump = json.loads(self.chez("dump", "--format", "json", system="darwin", arch=arch).stdout)
+                settings = json.loads(dump["Library/Application Support/Code/User/settings.json"]["contents"])
+                self.assertEqual(settings["terminal.integrated.profiles.osx"]["fish"], {"path": expected, "args": ["--login"]})
+                self.assertIn(".config/fish/conf.d/10-dev-setup.fish", dump)
+                self.assertNotIn(".config/fish/config.fish", dump)
+                self.assertEqual(settings["find-it-faster.general.shellPathForTerminal"], "/bin/bash")
+        custom = self.dump("darwin", macFishPath="/custom/brew/bin/fish")
+        settings = json.loads(custom["Library/Application Support/Code/User/settings.json"]["contents"])
+        self.assertEqual(settings["terminal.integrated.profiles.osx"]["fish"]["path"], "/custom/brew/bin/fish")
+        for system in ("windows", "linux"):
+            dump = self.dump(system)
+            self.assertFalse(any(path.startswith(".config/fish/") for path in dump))
+
+    def test_fish_startup_syntax_and_homebrew_path(self):
+        if not FISH or sys.platform == "win32":
+            self.skipTest("Portable Fish test tool not configured on this runner")
+        config = ROOT / "home/dot_config/fish/conf.d/10-dev-setup.fish"
+        subprocess.run([FISH, "--no-config", "--no-execute", str(config)], check=True, capture_output=True, text=True)
+        prefix = self.base / "brew-prefix"
+        node_bin = prefix / "opt/node@24/bin"
+        node_bin.mkdir(parents=True)
+        stub_dir = self.base / "stub-bin"
+        stub_dir.mkdir()
+        (stub_dir / "uname").write_text("#!/bin/sh\necho Darwin\n", encoding="utf-8")
+        (stub_dir / "brew").write_text('#!/bin/sh\nprintf \'set -gx HOMEBREW_PREFIX "%s"\\n\' "$DEV_SETUP_TEST_BREW_PREFIX"\n', encoding="utf-8")
+        for path in stub_dir.iterdir():
+            path.chmod(0o755)
+        env = dict(os.environ, PATH=str(stub_dir) + os.pathsep + os.environ["PATH"], DEV_SETUP_TEST_BREW_PREFIX=str(prefix))
+        code = 'source "$argv[1]"; source "$argv[1]"; contains -- "$argv[2]" $PATH; or exit 1; test (count (string match -- "$argv[2]" $PATH)) -eq 1'
+        result = subprocess.run([FISH, "--no-config", "--private", "-c", code, str(config), str(node_bin)], env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_app_store_signin_failure_is_reported_and_retried(self):
+        if not shutil.which("sh") or sys.platform == "win32":
+            self.skipTest("POSIX App Store stub test")
+        dump = self.dump("darwin", installPackages=True)
+        script = self.base / "app-store.sh"
+        script.write_text(dump["20-install-app-store.sh"]["contents"], encoding="utf-8")
+        stub_dir = self.base / "stub-bin"
+        stub_dir.mkdir()
+        (stub_dir / "sw_vers").write_text("#!/bin/sh\necho 27.0.1\n", encoding="utf-8")
+        (stub_dir / "mas").write_text('''#!/bin/sh
+if [ "$1" = list ]; then
+  if [ -f "$DEV_SETUP_TEST_MAS_INSTALLED" ]; then echo '6757801838 RunCat Neo'; fi
+  exit 0
+fi
+printf 'attempt\\n' >> "$DEV_SETUP_TEST_MAS_LOG"
+exit 23
+''', encoding="utf-8")
+        for path in stub_dir.iterdir():
+            path.chmod(0o755)
+        installed = self.base / "installed"
+        log = self.base / "attempts"
+        env = dict(os.environ, PATH=str(stub_dir) + os.pathsep + os.environ["PATH"], DEV_SETUP_TEST_MAS_INSTALLED=str(installed), DEV_SETUP_TEST_MAS_LOG=str(log))
+        first = subprocess.run(["sh", str(script)], env=env, capture_output=True, text=True)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertIn("Pending: RunCat Neo", first.stderr)
+        self.assertIn("sign-in and installer permissions", first.stderr)
+        self.assertIn("chezmoi apply", first.stderr)
+        installed.touch()
+        second = subprocess.run(["sh", str(script)], env=env, capture_output=True, text=True)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertIn("already installed", second.stdout)
+        self.assertEqual(log.read_text(encoding="utf-8"), "attempt\n")
 
     def test_apply_backup_repeat_and_preserve_unmanaged_files(self):
         path = self.destination / ".t3/userdata/settings.json"
@@ -149,6 +219,13 @@ class SetupTests(unittest.TestCase):
                     path.write_text(item["contents"], encoding="utf-8")
                     if name.endswith(".sh") and shutil.which("sh"):
                         result = subprocess.run(["sh", "-n", str(path)], capture_output=True, text=True)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                    if name == "10-install-packages.sh" and shutil.which("ruby"):
+                        body = re.search(r"<<'BREWFILE'\n(.*?)\nBREWFILE", item["contents"], re.S)
+                        self.assertIsNotNone(body)
+                        brewfile = rendered / f"{system}-{arch}-Brewfile"
+                        brewfile.write_text(body.group(1), encoding="utf-8")
+                        result = subprocess.run(["ruby", "--check", str(brewfile)], capture_output=True, text=True)
                         self.assertEqual(result.returncode, 0, result.stderr)
         if sys.platform == "win32":
             parser = self.base / "parse.ps1"

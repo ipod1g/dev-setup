@@ -12,3 +12,10 @@ credentials.json
 node_modules/
 __pycache__/
 .test-output/
+# Keep application exports and shell state private.
+*.rayconfig
+*.raycastconfig
+private-backups/
+fish_history
+fish_variables
+fishd.*

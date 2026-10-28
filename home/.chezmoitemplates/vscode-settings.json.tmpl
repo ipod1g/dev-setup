@@ -1,5 +1,9 @@
 {{- $settings := include ".chezmoitemplates/editor-settings.json" | fromJson -}}
 {{- if eq .chezmoi.os "darwin" -}}
 {{- $settings = mergeOverwrite $settings (include ".chezmoitemplates/editor-settings.macos.json" | fromJson) -}}
+{{- $fishPath := "/usr/local/bin/fish" -}}
+{{- if eq .chezmoi.arch "arm64" -}}{{- $fishPath = "/opt/homebrew/bin/fish" -}}{{- end -}}
+{{- $fishPath = get . "macFishPath" | default $fishPath -}}
+{{- $_ := set $settings "terminal.integrated.profiles.osx" (dict "fish" (dict "path" $fishPath "args" (list "--login"))) -}}
 {{- end -}}
 {{ $settings | toPrettyJson }}

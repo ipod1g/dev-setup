@@ -1,5 +1,5 @@
 {
-  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.osx": "fish",
   "terminal.external.osxExec": "iTerm2.app",
   "custom-ui-style.electron": {
     "transparent": false,

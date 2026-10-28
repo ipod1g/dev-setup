@@ -6,6 +6,7 @@ AppData
 {{ end }}
 {{ if ne .chezmoi.os "darwin" }}
 Library
+.config/fish
 {{ end }}
 {{ if ne .editor "cursor" }}
 AppData/Roaming/Cursor

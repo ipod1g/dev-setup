@@ -34,6 +34,7 @@ chezmoi init --apply https://github.com/ipod1g/dev-setup.git
 
 It installs Git, GitHub CLI, Node LTS, the selected editor and extensions, Codex, Claude Code, and T3 Code.
 Choosing VS Code also installs JetBrainsMono Nerd Font, Neovim, lazygit, and the `bat`, `fzf`, and `ripgrep` tools used by the supplied settings. Cursor retains its smaller baseline. Arc and iTerm2 are referenced by the Mac preferences but are not automatically installed.
+On macOS, the bootstrap also installs Fish, Raycast, Scroll Reverser, OpenUsage, and the `mas` CLI, then attempts to install RunCat Neo from the Mac App Store. A pending App Store sign-in is reported and retried on the next apply while the rest of setup continues. Existing editor and utility apps in `/Applications` or `~/Applications` are retained. See [Fish and Mac app preferences](docs/mac-shell-and-apps.md).
 On macOS Node 24 LTS is selected; WinGet uses its current Node LTS package. This is a reproducible selection of tools and settings, not a lock of every application version.
 Existing applications are retained without a requested upgrade. Agent installs are skipped when their command is already available.
 
@@ -57,6 +58,7 @@ The machine's `chezmoi.toml` has these choices under `[data]`:
 
 ```toml
 editor = "vscode"          # "vscode", "cursor", or "none"
+macFishPath = ""          # Optional custom Fish path; standard Homebrew path is automatic
 installPackages = true    # Homebrew/WinGet apps and editor extensions
 installAgents = true      # Codex, Claude Code, and T3 Code
 configureT3 = true        # Preferences and shortcuts, on the SERVER machine
@@ -77,6 +79,7 @@ Configuration files are restored as complete files, **not merged** with other lo
 ## What is preserved
 
 - The supplied MacBook VS Code settings: 160 shared preferences and six Mac-specific overrides, including Kimbie Dark, JetBrainsMono Nerd Font, relative line numbers, Prettier, custom UI styling, and FindItFaster preferences. See [the settings import notes](docs/macbook-settings.md).
+- Fish as the Mac VS Code shell, with an explicit Apple Silicon/Intel Homebrew profile and one managed PATH file at `~/.config/fish/conf.d/10-dev-setup.fish`. Personal Fish configuration, prompt, plugins, and aliases are awaiting capture; the bootstrap does not replace `config.fish` or change the system login shell.
 - The 56 VS Code extension IDs supplied from the MacBook, used for VS Code on macOS and Windows. Choosing Cursor restores its separate sixteen-extension inventory from the inspected Windows device. Extension packs may install additional dependencies; extension versions and enabled/disabled states are not captured by this ID-only list.
 - T3 server preferences, model favorites, and the current complete keybinding baseline. `mod` maps to Command on macOS and Ctrl on Windows/Linux.
 - An optional, allowlisted Codex model configuration from native Windows, disabled by default; WSL had no model defaults to export.
@@ -126,7 +129,7 @@ Editor keybindings are deliberately reviewed manually because they can run arbit
 
 ## Match the MacBook
 
-The MacBook is user-confirmed as **Apple M1 (Apple Silicon)**. T3 runs locally on the Mac and also connects to the Windows/WSL environment. Keep `configureT3 = true` on both the Mac and the WSL host; each has its own T3 state and provider logins. See [the MacBook setup guide](docs/macbook-setup.md) for this arrangement.
+The MacBook is user-confirmed as **Apple M1 (Apple Silicon), macOS 27.0.1**, using **Fish**. T3 runs locally on the Mac and also connects to the Windows/WSL environment. Keep `configureT3 = true` on both the Mac and the WSL host; each has its own T3 state and provider logins. See [the MacBook setup guide](docs/macbook-setup.md) for this arrangement.
 
 The macOS path and installer support do not require access to the Mac. To match its actual setup, collect:
 
@@ -140,7 +143,7 @@ brew list --cask
 ```
 
 Also review the active VS Code profile's user settings and keyboard shortcuts through **Preferences: Open User Settings (JSON)** and **Preferences: Open Keyboard Shortcuts (JSON)**. If using a named profile, export its extensions with `code --profile "<profile-name>" --list-extensions`.
-The supplied preferences establish zsh, iTerm2 as the external terminal, and JetBrainsMono Nerd Font. The user settings and extension IDs are imported; the macOS version, current VS Code keyboard shortcuts, and Mac-specific T3 preferences are still awaiting capture.
+The current shell choice is Fish; the earlier settings snapshot's zsh default has been updated. iTerm2 remains the configured external terminal and JetBrainsMono Nerd Font is installed. The user settings, extension IDs, OS version, and Mac app list are recorded; the current VS Code keyboard shortcuts, personal Fish configuration, app preferences, and Mac-specific T3 preferences are still awaiting capture.
 Review exports for credentials and private project paths before sharing or committing them to this public repository.
 
 ## Validation
@@ -151,7 +154,7 @@ With Python 3.11+ and chezmoi installed:
 python3 scripts/test_setup.py
 ```
 
-The suite renders Windows, Apple Silicon/Intel macOS, and WSL configurations; applies files to disposable destinations with installation disabled; checks backups, repeat application, optional components, platform-specific paths, and allowlisted capture. CI also runs on native Windows and macOS. No test installs applications, changes real home configuration, or performs a login.
+The suite renders Windows, Apple Silicon/Intel macOS, and WSL configurations; applies files to disposable destinations with installation disabled; checks backups, repeat application, optional components, platform-specific paths, allowlisted capture, and App Store retry behavior. Linux CI uses a checksum-verified portable Fish binary for syntax and PATH checks. CI also runs on native Windows and macOS. No test installs Mac apps, changes real home configuration or login shells, or performs a login.
 
 ## Upstream references
 

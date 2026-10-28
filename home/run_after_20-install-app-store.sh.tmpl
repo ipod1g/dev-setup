@@ -1,0 +1,23 @@
+{{ if and .installPackages (eq .chezmoi.os "darwin") -}}
+#!/bin/sh
+set -eu
+os_version=$(sw_vers -productVersion)
+os_major=${os_version%%.*}
+case "$os_major" in
+  ''|*[!0-9]*) echo 'Cannot determine macOS version for App Store installation.' >&2; exit 1 ;;
+esac
+{{ range .packages.macos.appStore -}}
+if [ "$os_major" -lt {{ .minimumMajor }} ]; then
+  printf '%s\n' '{{ .name }} requires macOS {{ .minimumMajor }} or newer; skipped on this Mac.' >&2
+elif ! command -v mas >/dev/null 2>&1; then
+  printf '%s\n' 'Pending: install {{ .name }} from {{ .url }} (mas is unavailable).' >&2
+elif mas list | awk '$1 == "{{ .id }}" {found=1} END {exit !found}'; then
+  printf '%s\n' '{{ .name }} is already installed.'
+elif mas install {{ .id }}; then
+  printf '%s\n' '{{ .name }} installed.'
+else
+  printf '%s\n' 'Pending: {{ .name }} installation did not finish. Check App Store sign-in and installer permissions: {{ .url }}' >&2
+  printf '%s\n' 'Retry with chezmoi apply after sign-in. The remaining setup will continue.' >&2
+fi
+{{ end -}}
+{{ end -}}

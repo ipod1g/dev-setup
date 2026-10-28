@@ -13,7 +13,7 @@ The 160 shared settings live in [`editor-settings.json`](../home/.chezmoitemplat
 
 The six Mac overrides live in [`editor-settings.macos.json`](../home/.chezmoitemplates/editor-settings.macos.json):
 
-- `terminal.integrated.defaultProfile.osx`: zsh.
+- `terminal.integrated.defaultProfile.osx`: Fish, updated after the user clarified the current shell.
 - `terminal.external.osxExec`: iTerm2.
 - `terminal.integrated.env.osx`: the supplied `FIG_NEW_SESSION` flag.
 - `workbench.externalBrowser`: Arc.
@@ -21,6 +21,7 @@ The six Mac overrides live in [`editor-settings.macos.json`](../home/.chezmoitem
 - `custom-ui-style.electron`: the supplied Electron window and vibrancy options.
 
 Those six preferences are not emitted into Windows VS Code settings. Cursor keeps the previously inspected minimal profile; it does not inherit the VS Code Custom UI Style configuration.
+The Mac renderer also adds an explicit Fish terminal profile: `/opt/homebrew/bin/fish` on Apple Silicon, `/usr/local/bin/fish` on Intel, or `macFishPath` for a custom prefix. FindItFaster keeps `/bin/bash` as its helper shell. The Fish change deliberately supersedes the older zsh value in the supplied snapshot.
 
 ## Portability adjustments
 
@@ -59,4 +60,4 @@ Language and container extensions do not provision their external SDKs or a Dock
 
 The automatic capture script still updates only its narrow allowlist. It now merges those captured preferences into the reviewed profile, preserving the full imported configuration and separate Mac overrides. Review additional settings manually before publishing them.
 
-The remaining inputs are the macOS version, current keyboard shortcuts, any intended extension enablement states, the Mac's Neovim init/keymaps, and any Mac-local T3 preferences that differ from the WSL-derived baseline.
+The remaining inputs are current keyboard shortcuts, any intended extension enablement states, the Mac's Neovim init/keymaps, personal Fish and app preferences, and any Mac-local T3 preferences that differ from the WSL-derived baseline. The user has confirmed macOS 27.0.1.

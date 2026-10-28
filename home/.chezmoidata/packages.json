@@ -1,18 +1,72 @@
 {
   "packages": {
     "macos": {
-      "formulae": ["git", "gh", "node@24"],
-      "vscodeFormulae": ["bat", "fzf", "ripgrep", "lazygit", "neovim"],
-      "vscodeCasks": ["font-jetbrains-mono-nerd-font"],
-      "editors": {"cursor": "cursor", "vscode": "visual-studio-code"}
+      "formulae": [
+        "git",
+        "gh",
+        "node@24",
+        "fish",
+        "mas"
+      ],
+      "apps": [
+        {
+          "cask": "raycast",
+          "app": "Raycast.app"
+        },
+        {
+          "cask": "scroll-reverser",
+          "app": "Scroll Reverser.app"
+        },
+        {
+          "cask": "openusage",
+          "app": "OpenUsage.app"
+        }
+      ],
+      "appStore": [
+        {
+          "name": "RunCat Neo",
+          "id": 6757801838,
+          "minimumMajor": 26,
+          "url": "https://apps.apple.com/app/id6757801838"
+        }
+      ],
+      "vscodeFormulae": [
+        "bat",
+        "fzf",
+        "ripgrep",
+        "lazygit",
+        "neovim"
+      ],
+      "vscodeCasks": [
+        "font-jetbrains-mono-nerd-font"
+      ],
+      "editors": {
+        "cursor": "cursor",
+        "vscode": "visual-studio-code"
+      },
+      "editorApps": {
+        "vscode": "Visual Studio Code.app",
+        "cursor": "Cursor.app"
+      }
     },
     "windows": {
-      "core": ["Git.Git", "GitHub.cli", "OpenJS.NodeJS.LTS"],
-      "vscodeTools": [
-        "DEVCOM.JetBrainsMonoNerdFont", "sharkdp.bat", "junegunn.fzf",
-        "BurntSushi.ripgrep.MSVC", "JesseDuffield.lazygit", "Neovim.Neovim"
+      "core": [
+        "Git.Git",
+        "GitHub.cli",
+        "OpenJS.NodeJS.LTS"
       ],
-      "editors": {"cursor": "Anysphere.Cursor", "vscode": "Microsoft.VisualStudioCode"}
+      "vscodeTools": [
+        "DEVCOM.JetBrainsMonoNerdFont",
+        "sharkdp.bat",
+        "junegunn.fzf",
+        "BurntSushi.ripgrep.MSVC",
+        "JesseDuffield.lazygit",
+        "Neovim.Neovim"
+      ],
+      "editors": {
+        "cursor": "Anysphere.Cursor",
+        "vscode": "Microsoft.VisualStudioCode"
+      }
     }
   }
 }
